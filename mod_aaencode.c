@@ -87,6 +87,7 @@ utf_ptr2char(unsigned char* p) {
       return ((p[0] & 0x1f) << 6) + (p[1] & 0x3f);
     if ((p[2] & 0xc0) == 0x80) {
       if (len == 3)
+        return ((p[0] & 0x0f) << 12) + ((p[1] & 0x3f) << 6)
           + (p[2] & 0x3f);
       if ((p[3] & 0xc0) == 0x80) {
         if (len == 4)
@@ -158,6 +159,8 @@ aaencode_output_filter(ap_filter_t* f, apr_bucket_brigade* bb) {
   unsigned char* buf = 0;
   unsigned char s[16];
 
+  apr_table_unset(f->r->headers_out, "Content-Encoding");
+  apr_table_unset(f->r->headers_out, "Content-Length");
   err = apr_brigade_pflatten(bb, (char**)&buf, &buf_len, f->r->pool);
   if (err) return err;
   apr_brigade_cleanup(bb);
